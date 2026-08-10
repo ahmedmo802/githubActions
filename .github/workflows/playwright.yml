@@ -6,22 +6,18 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    # Tell GitHub Actions to run commands inside the subfolder
-    defaults:
-      run:
-        working-directory: playwright-demo
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
