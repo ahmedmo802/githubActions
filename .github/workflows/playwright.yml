@@ -15,19 +15,31 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+      - name: Cache Playwright Browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --with-deps
+
+      - name: Install Playwright System Dependencies (Cache Hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Run Playwright tests
-        run: npx playwright test --reporter=html
+        run: npx playwright test --project=chromium --reporter=html
         env:
           CI: true
 
-      # ⬇️ ADD THE ARTIFACT UPLOAD STEP HERE (AT THE BOTTOM OF STEPS)
       - name: Upload Playwright Artifacts (Report & Traces)
         if: always()
         uses: actions/upload-artifact@v4
